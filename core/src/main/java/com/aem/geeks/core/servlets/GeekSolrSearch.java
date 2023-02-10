@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.services;
+package com.aem.geeks.core.servlets;;
 
 
 import com.google.gson.Gson;
