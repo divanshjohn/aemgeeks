@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.services;
+package com.aem.geeks.core.services;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.servlets;
+package com.aem.geeks.core.services;;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

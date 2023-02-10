@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.services;
+package com.aem.geeks.core.services;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;

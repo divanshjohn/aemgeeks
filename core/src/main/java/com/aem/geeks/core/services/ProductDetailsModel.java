@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.models;
+package com.aem.geeks.core.services;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;

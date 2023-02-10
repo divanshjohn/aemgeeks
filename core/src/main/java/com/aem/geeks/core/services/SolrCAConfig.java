@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.services;
+package com.aem.geeks.core.services;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.caconfig.annotation.Configuration;

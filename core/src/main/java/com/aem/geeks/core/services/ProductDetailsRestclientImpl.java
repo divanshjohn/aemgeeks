@@ -1,4 +1,4 @@
-package com.honeywell.aem.core.services.impl;
+package com.aem.geeks.core.services;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
