@@ -16,3 +16,534 @@
   	</div>
 	</div>
 </sly>
+/*
+https://aem4beginner.blogspot.com/servlet-to-get-all-tags-assigned-to-dam_8
+https://experienceleague.adobe.com/docs/experience-manager-64/developing/platform/tagging/building.html?lang=en
+https://github.com/Adobe-Consulting-Services/acs-aem-commons/blob/master/bundle/src/main/java/com/adobe/acs/commons/mcp/impl/processes/TagReporter.java
+https://gist.github.com/ksurendra/900b2c5ce943fd85112e4de376aaaf20#file-aemtag-java
+https://github.com/arunpatidar02/aem63app-repo/blob/master/java/GetChildNodeServlet.java
+https://experienceleaguecommunities.adobe.com/t5/adobe-experience-manager/get-all-the-child-node-name-in-the-parent-nodepath/m-p/313219
+===================
+ /farms property defines one or more sets of Dispatcher behaviors,
+ where each set is associated with different web sites or URLs.
+ 
+ The SDI enables the page to be cached with some placeholder(include) 
+ for dynamic data that will be replaced with real content while accessing the page.
+ @Model annotation provides 'defaultInjectionStrategy' attribute to indicate
+ if the injected fields in a sling model should be required/optional.
+ 
+  ReflectionTestUtils.setField();
+  Mockito can help with test case writing, there are certain things it cannot do viz:. 
+  mocking or testing private, final or static methods.
+  That is where, PowerMockito comes to the rescue.
+  PowerMockito is capable of testing private, final or static methods as it makes use of Java Reflection API.
+  
+  PowerMockito.mockStatic(PropertiesReader.class); PowerMockito.when(PropertiesReader.getProperty(Constants.PAGE_SIZE)).thenReturn(ONE);
+  
+  PowerMockito.whenNew(ClassWithFinalMethods.class).withNoArguments().thenReturn(mockObject);
+  
+  String str="India";
+  Char char[]=str.tocharArray()
+  for(i=char.length-1;i< =0;i--)
+  sop(char[i])
+  
+  army
+  String str="INIDA";
+  List<String> list=Arrays.asList(str.split(""));
+  The asList() method of java.util.Arrays class is used to return a fixed-size list
+  Collection.suffle(list);
+  String aftersuffle="";
+  for ( String char : list)
+  
+  {
+   aftersuffle +=char;
+  }
+  sop(aftersuffle);
+=================
+https://lucene.apache.org/solr/
+solr start -e cloud -noprompt
+solr stop -all
+https://github.com/deepakkhetawat/SolrPOCWithAEM
+https://www.slideshare.net/DEEPAKKHETAWAT/basics-of-solr-and-solr-integration-with-aem6-61150010
+
+Apache - https://archive.apache.org/dist/httpd...
+Dispatcher - https://experience.adobe.com/downloads
+https://httpd.apache.org/docs/2.4/rewrite/remapping.html
+https://httpd.apache.org/docs/2.4/rewrite/flags.html
+https://httpd.apache.org/docs/2.4/rewrite/flags.html
+=====================
+Sample query
+# General Queries
+ 
+#Finding pages based on jcr:content properties where propery doesnt exist
+path=/content/geometrixx
+type=cq:Page
+property=@jcr:content/jcr:title
+property.operation=not
+ 
+#Finding pages based on jcr:content properties where propery exists
+path=/content/geometrixx
+type=cq:Page
+property=@jcr:content/jcr:title
+property.operation=exists
+ 
+#Finding pages based on jcr:content properties where propery value is mentioned
+path=/content/geometrixx
+type=cq:Page
+property=@jcr:content/jcr:title
+property.value=English
+ 
+#Finding pages where property value is starting with English
+path=/content/geometrixx
+type=cq:Page
+1_property=@jcr:content/jcr:title
+1_property.value=English%
+1_property.operation=like
+ 
+#Finding empty properties : when properties exist and are blank.
+/jcr:root/content/geometrixx//element(*, cq:Page) [jcr:content/@jcr:title = '' ]
+ 
+#Find All Pages and order by cq:lastModified - Ascending Order
+type=cq:Page
+path=/content/geometrixx
+orderby=@jcr:content/cq:lastModified
+p.limit=-1
+ 
+#Find All Pages and order by cq:lastModified - Descending Order
+type=cq:Page
+path=/content/geometrixx
+orderby=@jcr:content/cq:lastModified
+orderby.sort=desc
+p.limit=-1
+ 
+#Find All Pages and order by cq:lastModified - Descending Order and Ignore Case
+type=cq:Page
+path=/content/geometrixx
+orderby=@jcr:content/cq:lastModified
+orderby.case=ignore
+orderby.sort=desc
+p.limit=-1
+ 
+#Seach for Multiple properties with AND Condition
+type=cq:Page
+1_property=@jcr:content/cq:template
+1_property.value=/apps/geometrixx/templates/contentpage
+2_property=@jcr:content/hideInNav
+2_property.value=true
+p.limit=-1
+ 
+#Seach for 1 property with multiple values
+type=cq:PageContent
+property=jcr:title
+property.1_value=Products
+property.2_value=Square
+property.3_value=Events
+p.limit=-1
+ 
+# Finds the pages that have been modified since they were last published
+path=/content/geometrixx
+property=cq:lastModifiedBy
+property.value=admin
+dateComparison.property1=cq:lastModified
+dateComparison.property2=cq:lastReplicated
+dateComparison.operation=greater
+Fulltext Queries
+
+# Queries using various variations and use-cases of Fulltext Search in AEM.
+ 
+#Fulltext search for term Management
+type=cq:Page
+path=/content/geometrixx
+fulltext=Management
+orderby=@jcr:score
+ 
+#Fulltext search for pages without the term Management
+type=cq:Page
+path=/content/geometrixx
+fulltext=-Management
+orderby=@jcr:score
+p.limit=-1
+ 
+#Fulltext search for pages with terms starting with Manage*
+type=cq:Page
+path=/content/geometrixx
+fulltext=Manage*
+orderby=@jcr:score
+p.limit=-1
+ 
+#Fulltext search for Multiple paths and OR condition with term 'the'
+type=cq:Page
+fulltext=the
+group.1_path=/content/geometrixx/en/products
+group.2_path=/content/geometrixx/en/company
+group.p.or=true
+p.limit=-1
+Facets Based Queries
+# Queries based on Facets implementation in AEM
+ 
+ 
+# p.facets=true : This will be used to Search Facets based search for the assigned Query. If you want to calculate the count of tags which are present in your search result or you want to know how many templates for a particular page are there etc, you may go with Facets based search .
+# http://localhost:4502/bin/querybuilder.json?1_property=jcr%3acontent%2fcq%3atags&2_property=jcr%3acontent%2fcq%3atemplate&2_property.value=%2fapps%2fgeometrixx%2ftemplates%2fcontentpage&orderby=jcr%3ascore&orderby.sort=desc&p.facets=true&type=cq%3aPage
+ 
+type=cq:Page
+1_property=jcr:content/cq:tags
+2_property=jcr:content/cq:template
+2_property.value=/apps/geometrixx/templates/contentpage
+orderby=jcr:score
+orderby.sort=desc
+p.facets=true
+Group Queries
+
+# Usage of Groups to define complex Queries
+ 
+ 
+#Search for Property with multiple values AND Property 2 with 1 value
+#(Title is Products or Square or Events)AND Template is ContentPage
+type=cq:PageContent
+1_property=jcr:title
+1_property.1_value=Products
+1_property.2_value=Square
+1_property.3_value=Events
+2_property=cq:template
+2_property.value=/apps/geometrixx/templates/contentpage
+p.limit=-1
+ 
+#Search for Property with multiple values OR Property 2 with 1 value
+# { (Title is Products or Square or Events ) OR Template is ContentPage }
+type=cq:PageContent
+1_group.1_property=jcr:title
+1_group.1_property.1_value=Products
+1_group.1_property.2_value=Square
+1_group.1_property.3_value=Events
+1_group.2_property=cq:template
+1_group.2_property.value=/apps/geometrixx/templates/contentpage
+1_group.p.or=true
+p.limit=-1
+ 
+#Search for Group 1 with OR conditions in properties AND Group 2 with OR conditions in properties
+# ({(Title is Products or Square or Events ) OR  (CQ:LastModifiedBy is Admin) } AND { Template is ContentPage or Homepage })
+type=cq:PageContent
+ 
+1_group.1_property=jcr:title
+1_group.1_property.1_value=Products
+1_group.1_property.2_value=Square
+1_group.1_property.3_value=Events
+1_group.2_property=cq:lastModifiedBy
+1_group.2_property.value=admin
+1_group.p.or=true   # if you remove this the condition between Group1 properties becomes an AND.
+ 
+2_group.2_property=cq:template
+2_group.2_property.1_value=/apps/geometrixx/templates/contentpage
+2_group.2_property.2_value=/apps/geometrixx/templates/homepage
+p.limit=-1
+ 
+ 
+ 
+#Search for Group 1 with OR conditions in properties OR Group 2 with OR conditions in properties
+# {  ({(Title is Products or Square or Events ) OR  (CQ:LastModifiedBy is Admin) } OR { Template is ContentPage or Homepage })  }
+type=cq:PageContent
+ 
+1_group.1_group.1_property=jcr:title
+1_group.1_group.1_property.1_value=Products
+1_group.1_group.1_property.2_value=Square
+1_group.1_group.1_property.3_value=Events
+1_group.1_group.2_property=cq:lastModifiedBy
+1_group.1_group.2_property.value=admin
+1_group.1_group.p.or=true
+1_group.2_group.2_property=cq:template
+1_group.2_group.2_property.1_value=/apps/geometrixx/templates/contentpage
+1_group.2_group.2_property.2_value=/apps/geometrixx/templates/homepage
+1_group.p.or=true
+ 
+p.limit=-1
+Queries for System Healthcheck
+
+# Queries which are useful to check System Health
+ 
+#Number of Workflows
+#STALE
+path=/etc/workflow/instances
+type=cq:Workflow
+property=status
+property.value=STALE
+p.limit=-1
+ 
+#RUNNING
+path=/etc/workflow/instances
+type=cq:Workflow
+property=status
+property.value=RUNNING
+p.limit=-1
+ 
+#COMPLETED
+path=/etc/workflow/instances
+type=cq:Workflow
+property=status
+property.value=COMPLETED
+p.limit=-1
+ 
+#Number of Audit Events between a date Range
+path=/var/audit
+type=cq:AuditEvent
+daterange.property=cq:time
+daterange.lowerBound=2017-07-28T15:43:08.279-04:00
+daterange.upperBound=2017-09-28T16:43:15.353-04:00
+p.limit=-1
+ 
+ 
+#Number of Pages created between a date range
+path=/var/audit/com.day.cq.wcm.core.page
+type=cq:AuditEvent
+1_property=cq:type
+1_property.value=PageCreated
+2_property=cq:category
+2_property.value=com/day/cq/wcm/core/page
+daterange.property=cq:time
+daterange.lowerBound=2017-07-28T15:43:08.279-04:00
+daterange.upperBound=2017-09-28T16:43:15.353-04:00
+p.limit=-1
+ 
+#Number of Assets created between a date range
+path=/var/audit/com.day.cq.replication
+type=cq:AuditEvent
+1_property=cq:type
+1_property.value=ASSET_CREATED
+2_property=cq:category
+2_property.value=com/day/cq/dam
+daterange.property=cq:time
+daterange.lowerBound=2017-07-28T15:43:08.279-04:00
+daterange.upperBound=2017-09-28T16:43:15.353-04:00
+p.limit=-1
+ 
+#Number of Replication events between a date range - Activations
+path=/var/audit/com.day.cq.replication
+type=cq:AuditEvent
+1_property=cq:type
+1_property.value=Activate
+2_property=cq:category
+2_property.value=com/day/cq/replication
+daterange.property=cq:time
+daterange.lowerBound=2017-07-28T15:43:08.279-04:00
+daterange.upperBound=2017-10-28T16:43:15.353-04:00
+p.limit=-1
+ 
+#Number of Replication events between a date range - Deletions
+path=/var/audit/com.day.cq.replication
+type=cq:AuditEvent
+1_property=cq:type
+1_property.value=Delete
+2_property=cq:category
+2_property.value=com/day/cq/replication
+daterange.property=cq:time
+daterange.lowerBound=2017-07-28T15:43:08.279-04:00
+daterange.upperBound=2017-10-28T16:43:15.353-04:00
+p.limit=-1
+Query Optimization Predicates
+# Predicates Used to Optimize and Filter results
+ 
+#p.limit: It defines  the number of results ; Default is 10 and -1 will return all results.
+fulltext=the
+type=cq:Page
+p.limit=-1
+ 
+#p.hits=full: All properties will be included for each node.
+fulltext=the
+type=cq:Page
+p.hits=full
+p.limit=-1
+ 
+#p.hits=selective : It specifies the properties you want to get in p.properties, separated by a space.
+fulltext=the
+type=cq:Page
+p.hits=selective
+p.properties=jcr:path jcr:primaryType
+p.limit=-1
+ 
+#p.nodedepth : This include the Child Nodes of the Search Results. p.nodedepth=n, where n is the number of levels you want the query to return. Note that, in order for a child node to be returned, it must be specified by the properties selector (p.hits=full).
+fulltext=the
+type=cq:Page
+p.hits=full
+p.nodedepth=2
+p.limit=100
+ 
+#p.guessTotal: Using this parameter can significantly improve the performance of queries that return large result sets because Oak does not need to calculate the exact number of the result set. The purpose of p.guessTotal parameter is to return the appropriate number of results that can be shown by combining the minimum viable p.offset and p.limit values.
+#Always set guessTotal to true unless you KNOW your result set will be small and counting it will be fast!
+fulltext=the
+type=cq:Page
+p.limit=-1
+p.guessTotal=true
+ 
+#p.offset=n : Sets the offset for the search results
+fulltext=a
+type=cq:Page
+p.limit=-1
+p.guessTotal=true
+p.offset=10
+Workflow Queries
+
+# Queries which are useful for Workflows Analysis in AEM .
+ 
+ 
+#Workflows in COMPLETED STATE . Other Worfklow statuses like RUNNING, STALE, ABORTED  , SUSPENDED can also be used. 
+ 
+path=/etc/workflow/instances
+type=cq:Workflow
+property=status
+property.value=COMPLETED
+p.limit=-1
+ 
+#Particular Workflow (DAM Update Asset )in COMPLETED STATE
+ 
+#Using Filter Predicate nodename - Not recommended as Filters work after the Query is executed.
+path=/etc/workflow/instances
+type=cq:Workflow
+property=status
+property.value=COMPLETED
+nodename=update_asset*
+p.limit=-1
+ 
+OR
+ 
+#Using Another Property and AND condition.
+path=/etc/workflow/instances
+type=cq:Workflow
+1_property=status
+1_property.value=COMPLETED
+2_property=modelId
+2_property.value=/etc/workflow/models/dam/update_asset/jcr:content/model
+p.limit=-1
+ 
+ 
+# Workflows between a particular Date Range
+path=/etc/workflow/instances
+type=cq:Workflow
+1_property=status
+1_property.value=COMPLETED
+daterange.property=startTime
+daterange.lowerBound=2017-09-28T15:43:08.279-04:00
+daterange.upperBound=2017-09-28T16:43:15.353-04:00
+p.limit=-1
+Additional Predicates
+# Queries which utilize OOTB predicates provided in AEM
+ 
+ 
+#tagid
+type=cq:Page
+tagid=marketing:interest/product
+tagid.property=jcr:content/cq:tags
+ 
+#dateComparison: show pages that have been modified since they were last published
+path=/content/geometrixx
+property=cq:lastModifiedBy
+property.value=admin
+dateComparison.property1=cq:lastModified
+dateComparison.property2=cq:lastReplicated
+dateComparison.operation=greater
+ 
+# date ranges:
+path=/var/audit
+type=cq:AuditEvent
+daterange.property=cq:time
+daterange.lowerBound=2017-07-28T15:43:08.279-04:00
+daterange.upperBound=2017-09-28T16:43:15.353-04:00
+p.limit=-1
+ 
+#nodename :node name pattern that allows wildcards: * = any or no char, ? = any char, [abc] = only chars in brackets
+type=nt:base
+path=/content/geometrixx
+nodename=image*
+p.limit=-1
+ 
+#hasPermission :comma (,) separated jcr permissions which will be AND to provide the final result. Will return true if and only if the current user session has given permissions on the path
+hasPermission=jcr:read,jcr:write
+path=/content/geometrixx
+p.limit=-1
+ 
+#relativedaterange :lowerBound and upperBound, but relative offsets to the current server time.
+path=/var/audit
+type=cq:AuditEvent
+relativedaterange.property=cq:time
+relativedaterange.lowerBound=-86400000
+p.limit=-1
+ 
+path=/var/audit
+type=cq:AuditEvent
+relativedaterange.property=cq:time
+relativedaterange.upperBound=3600000
+p.limit=-1
+ 
+ 
+#rangeproperty : Search for the Properties which are LONG, DOUBLE and DATE with specified lowerBound & upperBound
+path=/content/geometrixx
+rangeproperty.property=count
+rangeproperty.lowerBound=10
+rangeproperty.lowerOperation=>=
+p.limit=-1
+ 
+path=/content/geometrixx
+rangeproperty.property=count
+rangeproperty.upperBound=100
+rangeproperty.upperOperation=<=
+p.limit=-1
+ 
+#similar : does a similarity search using rep:similar().
+path=/content/geometrixx
+similar=/content/geometrixx/en/products/jcr:content/par/text
+p.limit=-1
+ 
+#boolproperty :specialized for boolean properties. It only accepts the values "true" and "false" and in the case of "false" it will check for both the value "false" and a non-existent property at all.
+path=/content/geometrixx
+boolproperty=textIsRich
+boolproperty.value=true
+p.limit=-1
+ 
+#language
+language=en
+path=/content/geometrixx
+type=cq:Page
+p.facets=true
+p.limit=-1
+ 
+#memberOf : Search based on the sling/collection : recently_modifiedassets which accumulates results based on a collection query.
+p.limit=-1
+memberOf=/content/dam/collections/a/admin/recently_modifiedassets
+path=/content/dam/geometrixx
+
+path=/content/dam/honeywellbt/en/fragments/in-the-news
+1_property=relAttribute
+1_property.1_value=noopener
+1_property.2_value=nofollow
+
+
+public String getRelAttribute() {
+		if (relAttribute==null)
+		  {
+			  String 
+			  Resource res= resolver.getResource(FRAGMENT_PATH);
+		      ValueMap map=res.adaptTo(ValueMap.class);
+		      String prop=map.get("relAttribute",String.class);
+			 if(prop.equals("default"))
+		   {
+			  return null;
+		   }
+			return prop;
+		   }
+		return relAttribute;
+	}
+	
+	Resource res= resolver.getResource(FRAGMENT_PATH);
+			logger.info("dillipdigal", res.getPath());
+			Iterator<Resource> itr=res.listChildren();
+			while(itr.hasNext()){
+				Resource child=itr.next();
+				logger.info("dillipdigol",child.getPath());
+				String prop=child.getValueMap().get("relAttribute",String.class);
+				return prop;
+			}
+===================================================================			
+PagePath-> Based on template
+path=/content/honeywellbt
+1_property=cq:template
+1_property.value=/conf/baseline-tenant/honeywellbt/settings/wcm/templates/folder-page
+
+*/
