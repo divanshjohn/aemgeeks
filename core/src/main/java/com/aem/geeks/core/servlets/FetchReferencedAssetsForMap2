@@ -1,0 +1,258 @@
+package com.americanbureauofshippingprogram.core.servlets;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+//import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.servlet.Servlet;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.fmdita.api.maps.MapUtilities;
+      
+import com.day.cq.dam.api.DamConstants;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+
+@Component(service = Servlet.class, immediate = true, property = {
+        Constants.SERVICE_DESCRIPTION + "=Fetch all the referenced assets for a map",
+        "sling.servlet.methods=" + HttpConstants.METHOD_GET, "sling.servlet.paths=/bin/techrevel/fetchreferencedassets" })
+public class FetchReferencedAssetsForMap2 extends SlingAllMethodsServlet {
+
+    private static final long serialVersionUID = 1L;
+
+    /** Default LOG. */
+    private static final Logger LOG = LoggerFactory.getLogger(FetchReferencedAssetsForMap2.class);
+    private static final String REQUEST_PARAM_PATH = "/content/dam/sample/samplemap.ditamap";
+    
+    @Override
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+
+        String requestedPath = request.getParameter(REQUEST_PARAM_PATH);
+        ResourceResolver resolver = request.getResourceResolver();
+       
+        try {
+
+            Map<String, Object> resultMap = new HashMap<>();
+            Gson gson = new Gson();
+
+            Session session = resolver.adaptTo(Session.class);
+            Node ditamapNode = session.getNode("/content/dam/sample/samplemap.ditamap");
+           LOG.info("+++++PATH++++"+ditamapNode.getPath());
+            List<Node> mapDependents = MapUtilities.getAllDependencies(ditamapNode);
+            List<AssetObject> listOfDitaObject = new ArrayList<>();
+            List<String> baselineObject = new ArrayList<>();
+            List<HashMap<String,String>> mapBaseline= MapUtilities.getBaselineList(session,"/content/dam/sample/samplemap.ditamap");
+                   LOG.info("++++++BASELINE LIST++"+mapBaseline.size());
+                   
+                   Resource fileResource = resolver.getResource("/content/dam/sample/samplemap.ditamap"+"/jcr:content/metadata/baselines");     
+                   Node fileNode = fileResource.adaptTo(Node.class);
+                   LOG.info("+++++NODE PATH+++++"+fileNode.getPath());
+                   		
+                	   //String dNode =fileNode.getPath()+"/jcr:content/metadata/baselines";
+                	   final NodeIterator it = fileNode.getNodes();
+                	   while (it.hasNext()) {
+                	       Node childNode = it.nextNode();
+                	      if (childNode.hasProperty("baselineObj")){
+                	    	  
+                	    	  InputStream xmlContent = childNode.getProperty("baselineObj").getBinary().getStream();
+                	    	  String xmlString = readBinary(xmlContent);
+                	    	 
+                	    	  JsonObject root = new Gson().fromJson(xmlString, JsonObject.class);
+                	    	  JsonArray arr = root.getAsJsonArray("directRefs");
+                	    	  for (int i = 0; i < arr.size(); i++) {
+                		           JsonObject  json = arr.get(i).getAsJsonObject();
+                		           String path=json.get("path").getAsString();
+                		           Resource fileResource1=resolver.getResource(path+"/jcr:content/renditions/original/jcr:content");
+                                   Node filenode1=fileResource1.adaptTo(Node.class);
+                                   InputStream binaryContent = filenode1.getProperty("jcr:data").getBinary().getStream();
+                                   String binaryString =readXml(binaryContent);
+                                   baselineObject.add(binaryString);
+                		                LOG.info(":::::::::::::::::::::::::VALUES RESULTS OF PATH-:::::::::::"+path);
+                		             
+                		            
+                		           
+                		            }
+                		           
+                	      }
+                	       
+                	   }
+                	
+                   
+                   //  HashMap<String,String> hm= new HashMap<String,String>(mapBaseline.size());
+                   for (HashMap<String, String> entry : mapBaseline) {
+                	    for (String key : entry.keySet()) {
+                	        String value = entry.get(key);
+                	        LOG.info("key = " + key);
+                	        LOG.info("value = " + value);
+                	       
+                	        if (key=="name") {
+                	     baselineObject.add(value);
+                	        }
+                	    }
+                	}
+                   LOG.info("+++++++BASELINEOBJECT+++++++++++++++"+baselineObject);
+                       /* mapBaseline.forEach(associateBaseline ->{
+                	   
+                	   baselineObject.add(getBaselineObject(resolver,associateBaseline));
+                   }); 
+                   */
+                   mapDependents.forEach(associatedAsset -> {
+                listOfDitaObject.add(getAssetObject(resolver, associatedAsset));
+            });
+            resultMap.put("assets", listOfDitaObject);
+            resultMap.put("baseline",baselineObject);
+            String jsonFromMap = gson.toJson(resultMap);
+           // response.getWriter().print("SLINGServletResponse");
+            response.getWriter().print(jsonFromMap);
+
+        } catch (IOException | RepositoryException e) {
+            LOG.error("Exception while fetching dependencies of DITA Map {} : {}", requestedPath, e);
+        } catch (Exception e) {
+            LOG.error("Exception while fetching dependencies of DITA Map {} : {}", requestedPath, e);
+        }
+    }
+
+    public String readBinary(InputStream content) {
+        String readLine;
+        BufferedReader br = new BufferedReader(new InputStreamReader(content));
+        StringBuilder strBuilder = new StringBuilder();
+
+        try {
+            while (((readLine = br.readLine()) != null)) {
+                strBuilder.append(readLine);
+            }
+        } catch (IOException e) {
+            LOG.error("IOException while reading InputStream into String : {}", e.getMessage());
+        }
+        return strBuilder.toString();
+    }
+    public String readXml(InputStream content) {
+        String readLine;
+        BufferedReader br = new BufferedReader(new InputStreamReader(content));
+        StringBuilder strBuilder = new StringBuilder();
+
+        try {
+            while (((readLine = br.readLine()) != null)) {
+                strBuilder.append(readLine);
+            }
+        } catch (IOException e) {
+            LOG.error("IOException while reading InputStream into String : {}", e.getMessage());
+        }
+        return strBuilder.toString();
+    }
+    
+   /* private BaselineObject getBaselineObject(HashMap<String, String> associateBaseline) {
+		// TODO Auto-generated method stub
+    	BaselineObject baseObject = new BaselineObject();
+    	
+    	return baseObject;
+	}
+    */
+
+	private AssetObject getAssetObject(ResourceResolver resolver, Node associatedAsset) {
+        AssetObject ditaObject = new AssetObject();
+        try {
+            Resource assetMetadataResource = resolver
+                    .getResource(associatedAsset.getPath() + "/jcr:content/metadata");
+            if (null != assetMetadataResource) {
+                ValueMap valueMap = assetMetadataResource.getValueMap();
+                
+                String title = valueMap.get(DamConstants.DC_TITLE, String.class);
+                if (title != null) {
+                    ditaObject.setTitle(title);
+                } else {
+                    // Fallback to filename if title is not set. Can happen with images…
+                    ditaObject.setTitle(associatedAsset.getName());
+                }
+            }
+            ditaObject.setName(associatedAsset.getName());
+            ditaObject.setPath(associatedAsset.getPath());
+
+        } catch (RepositoryException e) {
+            LOG.error("Repository Exception while fetching asset details : {}", e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Exception while fetching asset details : {}", e.getMessage());
+
+        }
+        return ditaObject;
+    }
+}
+
+class AssetObject {
+
+    String title;
+    String name;
+    String docState;
+    String path;
+    String checkedOutBy;
+    
+    public String getCheckedOutBy() {
+        return checkedOutBy;
+    }
+    public void setCheckedOutBy(String checkedOutBy) {
+        this.checkedOutBy = checkedOutBy;
+    }
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getDocState() {
+        return docState;
+    }
+    public void setDocState(String docState) {
+        this.docState = docState;
+    }
+    public String getPath() {
+        return path;
+    }
+    public void setPath(String path) {
+        this.path = path;
+    }   
+}
+class BaselineObject{
+	
+	String baselineTitle;
+    String baselineName;
+    public String getBaselineTitle() {
+        return baselineTitle;
+    }
+    public void setBaselineTitle(String baselineTitle) {
+        this.baselineTitle = baselineTitle;
+    }
+    public String getBaselineName() {
+        return baselineName;
+    }
+    public void setBaselineName(String baselineName) {
+        this.baselineName = baselineName;
+    }
+}
